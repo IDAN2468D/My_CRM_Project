@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { downloadCSV } from '@/lib/csvExport';
 import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
+import { User, Phone, Mail, Sparkles } from 'lucide-react';
 
 export default function CustomersPage() {
   const { data: session } = useSession();
@@ -245,53 +246,115 @@ export default function CustomersPage() {
 
       {/* Regular Add Customer Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl animate-in zoom-in duration-200">
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-              <h2 className="text-xl font-bold dark:text-white">הוספת רשומה לקוח</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-3xl font-black">&times;</button>
-            </div>
-            <form onSubmit={handleAdd} className="p-6 space-y-4 text-right">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-3xl shadow-2xl animate-in zoom-in duration-200 overflow-hidden flex flex-col">
+            
+            {/* Header */}
+            <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/20">
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">שם חדש (חובה)</label>
-                <input 
-                  required 
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-medium dark:text-white" 
-                  placeholder="דני צבי"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                />
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white">לקוח חדש</h2>
+                <p className="text-sm font-medium text-slate-500 mt-1">הזן פרטי לקוח באופן ידני או בעזרת AI</p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">טלפון (חובה)</label>
-                  <input 
-                    required 
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-medium dark:text-white" 
-                    placeholder="050-0000000"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">אימייל</label>
-                  <input 
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-medium dark:text-white" 
-                    placeholder="mail@ex.co.il"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    type="email"
-                  />
-                </div>
-              </div>
-              <button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="w-full bg-blue-600 text-white py-4 rounded-xl font-black shadow-lg shadow-blue-500/20 mt-4 hover:bg-blue-700 transition-all active:scale-[0.98] disabled:opacity-50"
+              <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:shadow-md transition-all font-black text-xl hover:scale-105">&times;</button>
+            </div>
+
+            <div className="p-8 overflow-y-auto max-h-[80vh] w-full">
+              {/* AI Magic Banner inside the form */}
+              <div 
+                onClick={() => { setIsModalOpen(false); setIsMagicModalOpen(true); }}
+                className="mb-8 p-[2px] rounded-2xl bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all hover:-translate-y-0.5"
               >
-                {isSubmitting ? 'שומר במערכת...' : 'צור ושמור לקוח'}
-              </button>
-            </form>
+                <div className="bg-white dark:bg-slate-900 rounded-[14px] px-6 py-4 flex items-center justify-between">
+                   <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center">
+                         <Sparkles size={24} />
+                      </div>
+                      <div>
+                         <h3 className="font-black text-slate-900 dark:text-white text-lg">Fast Track - קסם AI</h3>
+                         <p className="text-sm font-medium text-slate-500">הדבק טקסט חופשי והמערכת תמלא הכל עבורך</p>
+                      </div>
+                   </div>
+                   <span className="bg-purple-100 dark:bg-purple-900/50 text-purple-600 font-bold px-4 py-2 rounded-lg text-sm transition-colors group-hover:bg-purple-200">
+                      נסה עכשיו
+                   </span>
+                </div>
+              </div>
+
+              <form onSubmit={handleAdd} className="space-y-8 text-right">
+                
+                {/* Section: Contact Info */}
+                <div className="space-y-5">
+                  <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2">פרטי התקשרות יסודיים</h4>
+                  
+                  <div className="relative group">
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">שם חדש (חובה)</label>
+                    <div className="relative">
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                        <User size={20} />
+                      </div>
+                      <input 
+                        required 
+                        className="w-full pr-12 pl-4 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-100 dark:focus:border-indigo-900/50 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 font-medium dark:text-white transition-all text-lg shadow-sm" 
+                        placeholder="לדוגמה: ישראל ישראלי"
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="relative group">
+                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">טלפון (חובה)</label>
+                      <div className="relative">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                          <Phone size={20} />
+                        </div>
+                        <input 
+                          required 
+                          className="w-full pr-12 pl-4 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-100 dark:focus:border-indigo-900/50 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 font-medium dark:text-white transition-all text-lg text-left shadow-sm" 
+                          dir="ltr"
+                          placeholder="050-1234567"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="relative group">
+                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">אימייל (אופציונלי)</label>
+                      <div className="relative">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                          <Mail size={20} />
+                        </div>
+                        <input 
+                          type="email"
+                          className="w-full pr-12 pl-4 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-indigo-100 dark:focus:border-indigo-900/50 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 font-medium dark:text-white transition-all text-lg text-left shadow-sm" 
+                          dir="ltr"
+                          placeholder="mail@ex.co.il"
+                          value={formData.email}
+                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-8">
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="w-full bg-slate-900 dark:bg-indigo-600 text-white py-5 rounded-2xl font-black shadow-lg shadow-slate-900/20 dark:shadow-indigo-500/20 hover:bg-slate-800 dark:hover:bg-indigo-700 transition-all active:scale-[0.98] disabled:opacity-50 text-lg flex items-center justify-center gap-3"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        שומר במערכת...
+                      </>
+                    ) : 'מלא פרטים ושמור לקוח'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

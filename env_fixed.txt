@@ -1,0 +1,3 @@
+MONGODB_URI=mongodb+srv://idankzm:idankzm2468@cluster0.purdk.mongodb.net/crm_db?retryWrites=true&w=majority
+NEXTAUTH_SECRET=tFpNh7udZ/Vc1CS19LpyuwmoG3pMo0RXVwnF1LzZkS0=
+NEXTAUTH_URL=http://localhost:3000

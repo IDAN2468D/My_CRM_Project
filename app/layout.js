@@ -27,7 +27,7 @@ export default function RootLayout({ children }) {
               
               <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
                 {/* Main Header */}
-                <header className="h-20 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-8 z-10 shrink-0 shadow-sm">
+                <header className="relative h-20 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-8 z-50 shrink-0 shadow-sm">
                   {/* Right side (Mobile menu & Search) */}
                   <div className="flex items-center gap-4 flex-1">
                     <div className="md:hidden">

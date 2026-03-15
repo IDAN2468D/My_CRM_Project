@@ -47,26 +47,37 @@ export default function CustomerProfilePage({ params }) {
     setIsUpdating(false);
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
+  const onFileDrop = async (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer?.files?.[0] || e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      return toast.error('הקובץ גדול מדי (מקס׳ 5MB)');
+    if (file.size > 15 * 1024 * 1024) {
+      return toast.error('הקובץ גדול מדי (מקס׳ 15MB)');
     }
     
-    const toastId = toast.loading('מעלה מסמך למערכת...');
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-       const base64Url = event.target.result;
-       const res = await uploadDocument(id, file.name, base64Url, file.type);
-       if (res.success) {
-          toast.success('מסמך נשמר בהצלחה!', { id: toastId });
-          loadCustomer();
-       } else {
-          toast.error('שגיאה בשמירת מסמך', { id: toastId });
-       }
-    };
-    reader.readAsDataURL(file);
+    const toastId = toast.loading('מעלה קובץ לתיקיית Google Drive של הלקוח...');
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('customerId', id);
+    formData.append('customerName', customer.name);
+
+    try {
+      const res = await fetch('/api/upload', {
+         method: 'POST',
+         body: formData,
+      });
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+         toast.success('הקובץ נשמר בהצלחה בדרייב!', { id: toastId });
+         loadCustomer();
+      } else {
+         toast.error(data.error || 'שגיאה בשמירת מסמך', { id: toastId });
+      }
+    } catch(err) {
+      toast.error('שגיאה בתקשורת עם שרת האחסון', { id: toastId });
+    }
   };
 
   const generateInvoice = () => {
@@ -244,13 +255,23 @@ export default function CustomerProfilePage({ params }) {
             <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
               <div className="flex justify-between items-center mb-6">
                  <h2 className="text-xl font-bold flex items-center gap-2 dark:text-white">
-                   <FileText className="text-blue-500" /> מסמכים וקבצים
+                   <FileText className="text-blue-500" /> מערכת קבצים (Google Drive)
                  </h2>
-                 <label className="cursor-pointer bg-blue-50 dark:bg-blue-900/20 text-blue-600 px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-100 transition-colors flex items-center gap-2">
-                    <Upload size={16} /> העלה מסמך
-                    <input type="file" className="hidden" onChange={handleFileUpload} />
-                 </label>
               </div>
+
+              {/* Drag & Drop Zone */}
+              <label 
+                onDragOver={(e) => e.preventDefault()} 
+                onDrop={onFileDrop}
+                className="mb-8 border-2 border-dashed border-blue-200 dark:border-blue-900/50 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors rounded-3xl p-10 flex flex-col items-center justify-center cursor-pointer text-center group"
+              >
+                 <div className="w-16 h-16 bg-blue-100 text-blue-600 dark:bg-blue-900/40 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
+                    <Upload size={24} />
+                 </div>
+                 <h3 className="font-black text-lg text-slate-800 dark:text-white mb-2">גרור מסמכים לכאן</h3>
+                 <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">או לחץ לחפש מהמחשב (מגובה לענן ב-Google Drive)</p>
+                 <input type="file" className="hidden" onChange={onFileDrop} />
+              </label>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  {!customer.documents || customer.documents.length === 0 ? (
@@ -258,14 +279,14 @@ export default function CustomerProfilePage({ params }) {
                        אין מסמכים מצורפים ללקוח זה.
                     </div>
                  ) : (
-                    customer.documents.map(doc => (
+                    customer.documents.sort((a,b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)).map(doc => (
                        <div key={doc._id} className="p-4 border border-slate-100 dark:border-slate-800 rounded-2xl flex justify-between items-center group transition-colors hover:border-blue-200 dark:hover:border-blue-900/50 bg-slate-50 dark:bg-slate-900/50">
                           <div className="flex items-center gap-3 overflow-hidden">
                              <div className="w-10 h-10 bg-blue-100 text-blue-600 dark:bg-blue-900/40 rounded-xl flex items-center justify-center shrink-0">
                                 <FileText size={18} />
                              </div>
                              <div className="truncate">
-                                <a href={doc.url} download={doc.name} className="font-bold text-sm text-slate-800 dark:text-slate-200 hover:text-blue-600 transition-colors truncate">
+                                <a href={doc.url} target="_blank" rel="noopener noreferrer" className="font-bold text-sm text-slate-800 dark:text-slate-200 hover:text-blue-600 transition-colors truncate block max-w-[180px]">
                                    {doc.name}
                                 </a>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5 tracking-wider">
